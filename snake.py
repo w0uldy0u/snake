@@ -1,5 +1,5 @@
 # %% [markdown]
-# ### Pygame Example
+# ### Pygame Example 진호정
 
 # %% [markdown]
 # #### 0. 예제 설명(Introduction)
