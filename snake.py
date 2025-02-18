@@ -17,7 +17,7 @@ blue = pygame.Color(0, 0, 255)
 fps_controller = pygame.time.Clock()
 
 snake_pos = [100, 50]
-snake_body = [[100 - (i * 10), 50] for i in range(10)]
+snake_body = [[100 - (i * 10), 50] for i in range(3)]
 food_pos = [random.randrange(1, (frame[0]//10)) * 10,
             random.randrange(1, (frame[1]//10)) * 10]
 food_spawn = True
