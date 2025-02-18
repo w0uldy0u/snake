@@ -4,6 +4,8 @@ subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'pygame'])
 import pygame
 import random
 import time
+import logging
+import os
 
 fps = 30 
 frame = (720, 480)
@@ -19,10 +21,16 @@ fps_controller = pygame.time.Clock()
 snake_speed = 5
 snake_pos = [100, 50]
 snake_body = [[100 - (i * 10), 50] for i in range(10)]
+
 food_pos = [random.randrange(1, (frame[0]//10)) * 10,
             random.randrange(1, (frame[1]//10)) * 10]
 food_spawn = True
+
 direction = 'RIGHT'
+
+# 일시정지 상태 변수
+paused = False
+
 score = 0
 item_range = 10 #플레이어가 아이템을 먹을 수 있는 범위
 
@@ -37,14 +45,57 @@ shrink_duration = 6  # 텍스트 UI 표시 시간 테스트용값
 
 def Init(size):
     check_errors = pygame.init()
+
     if check_errors[1] > 0:
         print(f'[!] Had {check_errors[1]} errors when initialising game, exiting...')
         sys.exit(-1)
     else:
         print('[+] Game successfully initialised')
+
     pygame.display.set_caption('Snake Example with PyGame')
     game_window = pygame.display.set_mode(size)
     return game_window
+
+#최고기록 갱신코드
+def refresh_record(score):
+    logger = logging.getLogger()
+    logger.info("score : {}".format(score))
+    file = "record.txt"
+
+    # 파일이 없으면 초기값 0
+    if not os.path.isfile(file) or os.path.getsize(file) == 0:
+        f = open(file, "w")
+        f.write("0")
+        f.close()
+
+    # 파일 읽기 (최고 점수 확인)
+    f = open(file, "r")
+    record = int(f.read().strip())
+    f.close()
+
+    # 최고 기록 갱신 시에만 파일 쓰기
+    if score > record:
+        f = open(file, "w")
+        f.write(str(score))
+        f.close()
+def show_highscore(window, size, color, font, fontsize):
+    # Score를 띄우기 위한 설정입니다.
+    # Settings for showing score on screen
+    file = "record.txt"
+    f = open(file, "r")
+    record = int(f.read().strip())
+    score_font = pygame.font.SysFont(font, fontsize)
+    score_surface = score_font.render('High Score : ' + str(record), True, color)
+    score_rect = score_surface.get_rect()
+
+    # Game over 상황인지 게임중 상황인지에 따라 다른 위치를 선정합니다.
+    # Select different location depending on the situation.
+
+    score_rect.midtop = (size[0]/2, size[1]/1.15)#size[1]/1.25
+
+    # 설정한 글자를 window에 복사합니다.
+    # Copy the string to windows
+    window.blit(score_surface, score_rect)
 
 def show_score(window, size, choice, color, font, fontsize):
     score_font = pygame.font.SysFont(font, fontsize)
@@ -71,9 +122,26 @@ def game_over(window, size):
 
     pygame.display.flip()
 
+    refresh_record(score)
+    show_score(window, size, 0, green, 'times', 20)
+    show_highscore(window, size, blue, 'times', 20)
+    pygame.display.flip()
     time.sleep(3)
     pygame.quit()
     sys.exit()
+
+def toggle_pause():
+    global paused
+    paused = not paused
+
+# 일시정지 화면 표출 함수수
+def pause_screen(window,size):
+    pause_font = pygame.font.SysFont('times new roman', 50)
+    pause_surface = pause_font.render('PAUSED', True, red)
+    pause_rect = pause_surface.get_rect()
+    pause_rect.midtop = (size[0] / 2, size[1] / 3)
+    window.fill(black)
+    window.blit(pause_surface, pause_rect)
 
 def get_keyboard(cur_dir):
     keys = pygame.key.get_pressed()
@@ -85,6 +153,8 @@ def get_keyboard(cur_dir):
         return 'LEFT'
     if direction != 'LEFT' and (keys[pygame.K_RIGHT] or keys[ord('d')]):
         return 'RIGHT'
+    # 모두 해당하지 않다면 원래 방향을 돌려줍니다.
+    # Return current direction if none of keyboard input occured
     return cur_dir
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
@@ -132,6 +202,14 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:  # ESC로 종료
+                pygame.event.post(pygame.event.Event(pygame.QUIT))
+            elif event.key == ord('p'):  # p 키를 눌러 일시정지
+                toggle_pause()
+            else:
+                if not paused:
+                    direction = get_keyboard(event.key)
 
     if game_start_time is None:
         game_start_time = time.time()
@@ -142,6 +220,11 @@ while True:
             shrink_start_time = time.time()
 
     direction = get_keyboard(direction)
+
+    if paused:
+        pause_screen(main_window,frame)
+        pygame.display.update()
+        continue
 
     if direction == 'UP':
         snake_pos[1] -= snake_speed
