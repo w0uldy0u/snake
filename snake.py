@@ -42,6 +42,7 @@ magnet_active_time = 2 #테스트용값
 game_start_time = None
 shrink_start_time = None
 shrink_duration = 6  # 텍스트 UI 표시 시간 테스트용값
+food_spawn_probability = 0.7 # 음식 자기장 안 생성 확률 테스트용값***
 
 def Init(size):
     check_errors = pygame.init()
@@ -154,6 +155,19 @@ def get_keyboard(key, cur_dir):
         return 'RIGHT'
     return cur_dir
 
+def generate_food():
+    # 일정 확률로 자기장 안에 음식을 생성
+    if random.random() < food_spawn_probability:
+        food_x = random.randint(target_rect.x, target_rect.x + target_rect.width - 10)
+        food_y = random.randint(target_rect.y, target_rect.y + target_rect.height - 10)
+        food_pos = [food_x // 10 * 10, food_y // 10 * 10]
+    else:
+        # 나머지지 확률로 화면 내 임의의 위치 생성
+        food_pos = [
+            random.randrange(1, (frame[0]//10)) * 10,
+            random.randrange(1, (frame[1]//10)) * 10
+        ]
+    return food_pos
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
     target_width = target_rect.width
@@ -239,10 +253,7 @@ while True:
         snake_body.pop()
 
     if not food_spawn:
-        food_pos = [
-            random.randrange(1, (frame[0]//10)) * 10,
-            random.randrange(1, (frame[1]//10)) * 10
-        ]
+        food_pos = generate_food()
     food_spawn = True
 
     if magnet_active:
