@@ -3,7 +3,7 @@
 
 # %% [markdown]
 # #### 0. 예제 설명(Introduction)
-# Pygame은 쉽게 Game을 제작할 수 있도록 만들어진 module의 집합입니다.
+# Pygame은 쉽게 Game을 제작할 수 있도록 만들어진 module의 집합입니다. <진재희>
 # Python과 제공되는 간단한 몇가지의 함수만을 사용하여 실제로 구동할 수 있는 수준으로 만들 수 있습니다.
 # 자세한 사항은 [Pygame Homepage](https://www.pygame.org/)를 참조해주세요.
 #
