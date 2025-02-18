@@ -143,22 +143,16 @@ def pause_screen(window,size):
     window.fill(black)
     window.blit(pause_surface, pause_rect)
 
-def get_keyboard(cur_dir):
-    keys = pygame.key.get_pressed()
-
-    if cur_dir != 'DOWN' and (keys[pygame.K_UP] or keys[ord('w')]):
+def get_keyboard(key, cur_dir):
+    if direction != 'DOWN' and key == pygame.K_UP or key == ord('w'):
         return 'UP'
-
-    if cur_dir != 'UP' and (keys[pygame.K_DOWN] or keys[ord('s')]):
+    if direction != 'UP' and key == pygame.K_DOWN or key == ord('s'):
         return 'DOWN'
-
-    if cur_dir != 'RIGHT' and (keys[pygame.K_LEFT] or keys[ord('a')]):
+    if direction != 'RIGHT' and key == pygame.K_LEFT or key == ord('a'):
         return 'LEFT'
-
-    if cur_dir != 'LEFT' and (keys[pygame.K_RIGHT] or keys[ord('d')]):
+    if direction != 'LEFT' and key == pygame.K_RIGHT or key == ord('d'):
         return 'RIGHT'
-
-    return cur_dir  # 방향이 바뀌지 않으면 기존 방향을 반환
+    return cur_dir
 
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
@@ -213,7 +207,7 @@ while True:
                 toggle_pause()
             else:
                 if not paused:
-                    direction = get_keyboard(event.key)
+                    direction = get_keyboard(event.key, direction)
 
     if game_start_time is None:
         game_start_time = time.time()
@@ -222,8 +216,6 @@ while True:
         magnet_active = True
         if shrink_start_time is None:
             shrink_start_time = time.time()
-
-    direction = get_keyboard(direction)
 
     if paused:
         pause_screen(main_window,frame)
