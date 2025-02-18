@@ -134,7 +134,7 @@ def toggle_pause():
     global paused
     paused = not paused
 
-# 일시정지 화면 표출 함수수
+# 일시정지 화면 표출 함수
 def pause_screen(window,size):
     pause_font = pygame.font.SysFont('times new roman', 50)
     pause_surface = pause_font.render('PAUSED', True, red)
@@ -145,17 +145,21 @@ def pause_screen(window,size):
 
 def get_keyboard(cur_dir):
     keys = pygame.key.get_pressed()
-    if direction != 'DOWN' and (keys[pygame.K_UP] or keys[ord('w')]):
+
+    if cur_dir != 'DOWN' and (keys[pygame.K_UP] or keys[ord('w')]):
         return 'UP'
-    if direction != 'UP' and (keys[pygame.K_DOWN] or keys[ord('s')]):
+
+    if cur_dir != 'UP' and (keys[pygame.K_DOWN] or keys[ord('s')]):
         return 'DOWN'
-    if direction != 'RIGHT' and (keys[pygame.K_LEFT] or keys[ord('a')]):
+
+    if cur_dir != 'RIGHT' and (keys[pygame.K_LEFT] or keys[ord('a')]):
         return 'LEFT'
-    if direction != 'LEFT' and (keys[pygame.K_RIGHT] or keys[ord('d')]):
+
+    if cur_dir != 'LEFT' and (keys[pygame.K_RIGHT] or keys[ord('d')]):
         return 'RIGHT'
-    # 모두 해당하지 않다면 원래 방향을 돌려줍니다.
-    # Return current direction if none of keyboard input occured
-    return cur_dir
+
+    return cur_dir  # 방향이 바뀌지 않으면 기존 방향을 반환
+
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
     target_width = target_rect.width
