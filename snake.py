@@ -200,13 +200,14 @@ def game_over(window, size):
 #게임 상태 초기화 함수
 def restart_game():
     global score, health, snake_pos, snake_body, food_positions, direction, food_gen_count, double_score_active, double_score_start_time, magnet_active, magnet_radius_width, magnet_radius_height, shrink_start_time, last_damage_time
-    global food_gen_count
+    global food_gen_count, snake_speed
     score = 0
     health = 10
     snake_pos = [100, 50]
     snake_body = [[100 - (i * 10), 50] for i in range(10)]
     food_positions = []
     food_gen_count = 0
+    snake_speed = 3
     direction = 'RIGHT'
     double_score_active = False
     double_score_start_time = None
