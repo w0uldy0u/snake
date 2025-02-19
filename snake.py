@@ -128,6 +128,8 @@ def show_score(window, size, choice, color, font, fontsize):
     window.blit(score_surface, score_rect)
 
 def game_over(window, size):
+    global score, health, snake_pos, snake_body, food_positions, direction, food_gen_count, double_score_active, double_score_start_time, magnet_active, magnet_radius_width, magnet_radius_height, shrink_start_time, last_damage_time
+
     my_font = pygame.font.SysFont('times new roman', 90)
     game_over_surface = my_font.render('Game Over', True, red)
     game_over_rect = game_over_surface.get_rect()
@@ -136,16 +138,55 @@ def game_over(window, size):
     window.fill(black)
     window.blit(game_over_surface, game_over_rect)
 
-
-    pygame.display.flip()
-
+    # 최고 점수 갱신
     record = refresh_record(score)
     show_score(window, size, 0, white, 'times', 20)
     show_highscore(window, size,0, green, 'times', 20)
+
+    # 재시작/종료 선택지
+    font = pygame.font.SysFont('times new roman', 30)
+    restart_text = font.render("Press R to Restart or Q to Quit", True, white)
+    restart_rect = restart_text.get_rect()
+    restart_rect.midtop = (size[0]/2, size[1]/1.5)
+    window.blit(restart_text, restart_rect)
+    
     pygame.display.flip()
-    time.sleep(3)
-    pygame.quit()
-    sys.exit()
+
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r: 
+                    restart_game()
+                    waiting_for_input = False
+                elif event.key == pygame.K_q: 
+                    pygame.quit()
+                    sys.exit()
+
+#게임 상태 초기화 함수
+def restart_game():
+    global score, health, snake_pos, snake_body, food_positions, direction, food_gen_count, double_score_active, double_score_start_time, magnet_active, magnet_radius_width, magnet_radius_height, shrink_start_time, last_damage_time
+    
+    score = 0
+    health = 10
+    snake_pos = [100, 50]
+    snake_body = [[100 - (i * 10), 50] for i in range(10)]
+    food_positions = []
+    food_gen_count = 0
+    direction = 'RIGHT'
+    double_score_active = False
+    double_score_start_time = None
+    magnet_active = False
+    magnet_radius_width = game_frame[0] * 1.2
+    magnet_radius_height = game_frame[1] * 1.2
+    shrink_start_time = None
+    last_damage_time = time.time()
+
+    global game_start_time
+    game_start_time = None
 
 def toggle_pause():
     global paused
