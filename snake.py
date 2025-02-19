@@ -21,7 +21,7 @@ yellow = pygame.Color(255, 255, 0)
 fps_controller = pygame.time.Clock()
 
 snake_speed = 3
-snake_acc = 0.01
+snake_acc = 0.05
 snake_pos = [100, 50]
 snake_body = [[100 - (i * 10), 50] for i in range(10)]
 
@@ -46,11 +46,11 @@ item_range = 10 #플레이어가 아이템을 먹을 수 있는 범위
 
 double_score_active = False
 double_score_start_time = None
-double_score_duration = 8 #테스트용값
+double_score_duration = 5 #테스트용값
 
 reverse_active = False
 reverse_active_start_time = None
-reverse_active_duration = 5
+reverse_active_duration = 4
 
 
 
@@ -63,12 +63,24 @@ game_start_time = None
 shrink_start_time = None
 shrink_duration = 5  # 텍스트 UI 표시 시간 테스트용값
 food_spawn_probability = 0.7 # 음식 자기장 안 생성 확률 테스트용값***
-safe_time = 0.5 # 자기장 밖에서 체력 닳는 주기 테스트용값**
+safe_time = 0.2 # 자기장 밖에서 체력 닳는 주기 테스트용값**
 
 pygame.mixer.init()
 
 confuse_sfx = pygame.mixer.Sound("sound/affecting.ogg")
 confuse_sfx.set_volume(0.2)
+eating_sfx = pygame.mixer.Sound("sound/eating.mp3")
+eating_sfx.set_volume(0.3)
+gameover_sfx = pygame.mixer.Sound("sound/gameover.mp3")
+gameover_sfx.set_volume(0.3)
+hpdown_sfx = pygame.mixer.Sound("sound/hp_down.mp3")
+hpdown_sfx.set_volume(0.3)
+main_bg = pygame.mixer.Sound("sound/main_bg.mp3")
+main_bg.set_volume(0.2)
+heal_sfx = pygame.mixer.Sound("sound/heal.mp3")
+heal_sfx.set_volume(0.2)
+double_sfx = pygame.mixer.Sound("sound/double_point.mp3")
+double_sfx.set_volume(0.3)
 
 def Init(size):
     check_errors = pygame.init()
@@ -146,8 +158,15 @@ def game_over(window, size):
     game_over_rect = game_over_surface.get_rect()
     game_over_rect.midtop = (size[0]/2, size[1]/4)
 
+    main_bg.stop()
+    gameover_sfx.play()
+
     window.fill(black)
     window.blit(game_over_surface, game_over_rect)
+
+    global reverse_activer
+    reverse_active = False
+    confuse_sfx.stop()
 
     # 최고 점수 갱신
     record = refresh_record(score)
@@ -172,6 +191,7 @@ def game_over(window, size):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r: 
                     restart_game()
+                    main_bg.play(loops=1)
                     waiting_for_input = False
                 elif event.key == pygame.K_q: 
                     pygame.quit()
@@ -198,8 +218,10 @@ def restart_game():
 
     food_gen_count = 3
 
-    global game_start_time
+    global game_start_time, reverse_active_start_time
     game_start_time = None
+    reverse_active_start_time = 999
+    is_reverse(direction)
 
 def toggle_pause():
     global paused
@@ -347,20 +369,24 @@ def apply_item_effect(effect):
     
     elif effect == "double_score":
         #함수 추가
+        double_sfx.play()
         print("double_score")
         double_score_active = True
         double_score_start_time = time.time()
     
     elif effect == "hp_up":
+        heal_sfx.play()
         print("hp_up")
         health = min(10, health + 2)  # 최대 HP 제한
     
     elif effect == "hp_down":
+        hpdown_sfx.play()
         print("hp_down")
         health = max(0, health - 2)  # 최소 HP 제한
     
     elif effect == "score_3":
         print("score_3")
+        eating_sfx.play()
         if double_score_active:
             score += 6
         else:
@@ -368,6 +394,7 @@ def apply_item_effect(effect):
     
     elif effect == "score_5":
         print("score_5")
+        eating_sfx.play()
         if double_score_active:
             score += 10
         else:
@@ -375,6 +402,7 @@ def apply_item_effect(effect):
     
     elif effect == "score_1":
         print("score_1")
+        eating_sfx.play()
         if double_score_active:
             score += 2
         else:
@@ -498,6 +526,9 @@ main_window = Init(frame)
 last_damage_time = time.time()
 
 record = get_record()
+
+main_bg.play(loops=1)
+
 while True:
     remove_expired_items()
     for event in pygame.event.get():
@@ -566,6 +597,7 @@ while True:
         food_gen_count -=1
         generate_food()
 
+
     # if not food_spawn:
     #    food_pos = generate_food()
     #food_spawn = True
@@ -612,6 +644,13 @@ while True:
         font = pygame.font.SysFont('times new roman', 25)
         text_surface = font.render("Magnetic Field is Shrinking!", True, white)
         main_window.blit(text_surface, (frame[0] // 2 - text_surface.get_width() // 2, 10))
+
+    if double_score_active:
+        font = pygame.font.Font(None, 36)  # 기본 폰트, 크기 36
+        text_surface = font.render("DOUBLE SCORE ACTIVE!", True, (255, 255, 0))  # 노란색 텍스트
+        text_rect = text_surface.get_rect()
+        text_rect.bottomright = (main_window.get_width() - 10, main_window.get_height() - 10)  # 오른쪽 아래 정렬
+        main_window.blit(text_surface, text_rect)  # 화면에 표시
     
     pygame.display.update()
 
