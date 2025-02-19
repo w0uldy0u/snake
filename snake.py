@@ -217,16 +217,29 @@ def draw_health_bar(window):
 #체력 실시간 업데이트
 def update_health():
     global health
-    if snake_pos[0] < 0 or snake_pos[0] > frame[0] - 10:
-        health -= 10
-    if snake_pos[1] < 0 or snake_pos[1] > game_frame[1] - 10:
-        health -= 10
-    for block in snake_body[1:]:
-        if snake_pos[0] == block[0] and snake_pos[1] == block[1]:
-            health -= 2
-            break
+    check_outside_magnet()
+
     if health <= 0:
         game_over(main_window, frame)
+
+def check_outside_magnet():
+    global health, last_damage_time
+
+    inner_rect = pygame.Rect(
+        target_rect.x + (target_rect.width - magnet_radius_width) // 2,
+        target_rect.y + (target_rect.height - magnet_radius_height) // 2,
+        magnet_radius_width, magnet_radius_height
+    )
+
+    if not inner_rect.collidepoint(snake_pos):
+        current_time = time.time()
+        
+        # 0.5초마다 체력 감소
+        if current_time - last_damage_time >= 0.5:
+            health -= 1
+            last_damage_time = current_time
+
+
     
 
 # 목표 영역 크기 설정
@@ -237,6 +250,7 @@ target_y = random.randint(50, game_frame[1] - target_size_height - 50)
 target_rect = pygame.Rect(target_x, target_y, target_size_width, target_size_height)
 
 main_window = Init(frame)
+last_damage_time = time.time()
 
 while True:
     for event in pygame.event.get():
@@ -301,7 +315,7 @@ while True:
 
     draw_magnetic_field(main_window, magnet_radius_width, magnet_radius_height, target_rect)
 
-    if snake_pos[0] < 0 or snake_pos[0] > frame[0] - 10 or snake_pos[1] < 0 or snake_pos[1] > frame[1] - 10:
+    if snake_pos[0] < 0 or snake_pos[0] > game_frame[0] - 10 or snake_pos[1] < 0 or snake_pos[1] > game_frame[1] - 10:
         game_over(main_window, frame)
 
     for block in snake_body[1:]:
@@ -315,7 +329,7 @@ while True:
         font = pygame.font.SysFont('times new roman', 25)
         text_surface = font.render("Magnetic Field is Shrinking!", True, white)
         main_window.blit(text_surface, (frame[0] // 2 - text_surface.get_width() // 2, 10))
-
+    
     pygame.display.update()
 
     fps_controller.tick(fps)
