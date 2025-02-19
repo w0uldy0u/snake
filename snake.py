@@ -429,12 +429,15 @@ def update_double_score_effect():
     if double_score_active and time.time() - double_score_start_time >= double_score_duration:
         double_score_active = False
 
-# def draw_snake():
-#     for i, segment in enumerate(snake_body[1:]):
-#         x, y = segment[0], segment[1]
-#         # 뱀 몸통 그리기
-#         green_intensity = 255 - (i * 10)  # 뱀의 색상 그라디언트 효과
-#         pygame.draw.rect(main_window, (green_intensity, 255, 0), pygame.Rect(x, y, 10, 10))
+def draw_body():
+    for i, segment in enumerate(snake_body[1:]):
+        x, y = segment[0], segment[1]
+        # 초록에서 노란색으로 변하는 그라디언트
+        green_intensity = max(0, 255 - (i * 10))  # 초록색은 점점 줄어듦
+        red_intensity = min(255, i * 10)  # 빨간색은 점점 증가
+        color = pygame.Color(red_intensity, 255, 0)  # (R, G, B) 색상 설정 (노란색에 가까워짐)
+        pygame.draw.rect(main_window, color, pygame.Rect(x, y, 10, 10))
+
 
 
 # 목표 영역 크기 설정
@@ -527,7 +530,7 @@ while True:
     main_window.fill(black)
     # draw_snake()
     for pos in snake_body:
-        pygame.draw.rect(main_window, green, pygame.Rect(pos[0], pos[1], 10, 10))
+        draw_body()
     '''
         for food in food_positions:
         if abs(snake_pos[0] - food["pos"][0]) < item_range and abs(snake_pos[1] - food["pos"][1]) < item_range:
