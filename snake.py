@@ -128,6 +128,8 @@ def show_score(window, size, choice, color, font, fontsize):
     window.blit(score_surface, score_rect)
 
 def game_over(window, size):
+    global score, health, snake_pos, snake_body, food_positions, direction, food_gen_count, double_score_active, double_score_start_time, magnet_active, magnet_radius_width, magnet_radius_height, shrink_start_time, last_damage_time
+
     my_font = pygame.font.SysFont('times new roman', 90)
     game_over_surface = my_font.render('Game Over', True, red)
     game_over_rect = game_over_surface.get_rect()
@@ -136,16 +138,55 @@ def game_over(window, size):
     window.fill(black)
     window.blit(game_over_surface, game_over_rect)
 
-
-    pygame.display.flip()
-
+    # 최고 점수 갱신
     record = refresh_record(score)
     show_score(window, size, 0, white, 'times', 20)
     show_highscore(window, size,0, green, 'times', 20)
+
+    # 재시작/종료 선택지
+    font = pygame.font.SysFont('times new roman', 30)
+    restart_text = font.render("Press R to Restart or Q to Quit", True, white)
+    restart_rect = restart_text.get_rect()
+    restart_rect.midtop = (size[0]/2, size[1]/1.5)
+    window.blit(restart_text, restart_rect)
+    
     pygame.display.flip()
-    time.sleep(3)
-    pygame.quit()
-    sys.exit()
+
+    waiting_for_input = True
+    while waiting_for_input:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r: 
+                    restart_game()
+                    waiting_for_input = False
+                elif event.key == pygame.K_q: 
+                    pygame.quit()
+                    sys.exit()
+
+#게임 상태 초기화 함수
+def restart_game():
+    global score, health, snake_pos, snake_body, food_positions, direction, food_gen_count, double_score_active, double_score_start_time, magnet_active, magnet_radius_width, magnet_radius_height, shrink_start_time, last_damage_time
+    
+    score = 0
+    health = 10
+    snake_pos = [100, 50]
+    snake_body = [[100 - (i * 10), 50] for i in range(10)]
+    food_positions = []
+    food_gen_count = 0
+    direction = 'RIGHT'
+    double_score_active = False
+    double_score_start_time = None
+    magnet_active = False
+    magnet_radius_width = game_frame[0] * 1.2
+    magnet_radius_height = game_frame[1] * 1.2
+    shrink_start_time = None
+    last_damage_time = time.time()
+
+    global game_start_time
+    game_start_time = None
 
 def toggle_pause():
     global paused
@@ -172,6 +213,7 @@ def get_keyboard(key, cur_dir):
     return cur_dir
 
 def generate_food():
+    global food_positions
     # 일정 확률로 자기장 안에 음식을 생성
     if random.random() < food_spawn_probability:
         food_x = random.randint(target_rect.x, target_rect.x + target_rect.width - 10)
@@ -217,7 +259,7 @@ def generate_food():
     return food_positions
 
 def apply_item_effect(effect):
-    global score, health
+    global score, health,double_score_active, double_score_start_time
     if effect == "confuse":
         # 함수 추가
         print("confuse")
@@ -225,6 +267,8 @@ def apply_item_effect(effect):
     elif effect == "double_score":
         #함수 추가
         print("double_score")
+        double_score_active = True
+        double_score_start_time = time.time()
     
     elif effect == "hp_up":
         print("hp_up")
@@ -236,15 +280,24 @@ def apply_item_effect(effect):
     
     elif effect == "score_3":
         print("score_3")
-        score += 3
+        if double_score_active:
+            score += 6
+        else:
+            score += 3
     
     elif effect == "score_5":
         print("score_5")
-        score += 5
+        if double_score_active:
+            score += 10
+        else:
+            score += 5
     
     elif effect == "score_1":
         print("score_1")
-        score += 1
+        if double_score_active:
+            score += 2
+        else:
+            score += 1
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
     target_width = target_rect.width
@@ -397,16 +450,19 @@ while True:
     #만약 음식을 먹지 않았다면
     '''
     for food in food_positions:
-        if abs(snake_pos[0] - food["pos"][0]) < item_range and abs(snake_pos[1] - food["pos"][1]) < item_range:
+        if abs(snake_pos[0] - food["pos"][0]) < food["size"][0] and abs(snake_pos[1] - food["pos"][1]) < food["size"][0]:
             apply_item_effect(food["effect"])
             food_positions.remove(food)
             food_gen_count += 1
             flag = 1
     if flag == -1:
         snake_body.pop()
-    check_double_score_item_collision()
+    #호정님 코드
+    #check_double_score_item_collision()
     if double_score_active:
         update_double_score_effect()
+        
+    #호정님 코드
 
     if food_gen_count >=1:
         food_gen_count -=1
