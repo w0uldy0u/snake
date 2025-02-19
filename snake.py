@@ -322,6 +322,10 @@ while True:
     else:
         snake_body.pop()
 
+    check_double_score_item_collision()
+    if double_score_active:
+        update_double_score_effect()
+
     if not food_spawn:
         food_pos = generate_food()
     food_spawn = True
