@@ -6,7 +6,8 @@ import random
 import time
 import logging
 import os
-
+record = 0
+fpscnt = 0
 fps = 30 
 frame = (720, 630)
 game_frame = (720, 480)
@@ -58,7 +59,14 @@ def Init(size):
     pygame.display.set_caption('Snake Example with PyGame')
     game_window = pygame.display.set_mode(size)
     return game_window
-
+def get_record():
+    file = "record.txt"
+    if not os.path.isfile(file) or os.path.getsize(file) == 0:
+        return 0
+    f = open(file, "r")
+    record = int(f.read().strip())
+    f.close()
+    return record
 #최고기록 갱신코드
 def refresh_record(score):
     logger = logging.getLogger()
@@ -81,23 +89,18 @@ def refresh_record(score):
         f = open(file, "w")
         f.write(str(score))
         f.close()
-def show_highscore(window, size, color, font, fontsize):
-    # Score를 띄우기 위한 설정입니다.
-    # Settings for showing score on screen
-    file = "record.txt"
-    f = open(file, "r")
-    record = int(f.read().strip())
+        return score
+    return record
+def show_highscore(window, size, choice, color, font, fontsize):
     score_font = pygame.font.SysFont(font, fontsize)
     score_surface = score_font.render('High Score : ' + str(record), True, color)
     score_rect = score_surface.get_rect()
-
-    # Game over 상황인지 게임중 상황인지에 따라 다른 위치를 선정합니다.
-    # Select different location depending on the situation.
-
     score_rect.midtop = (size[0]/2, size[1]/1.15)#size[1]/1.25
+    if choice == 1:
+        score_rect.midtop = (size[0]/8.5, size[1]/1.15)
+    else:
+        score_rect.midtop = (size[0]/2, size[1]/1.15)
 
-    # 설정한 글자를 window에 복사합니다.
-    # Copy the string to windows
     window.blit(score_surface, score_rect)
 
 def show_score(window, size, choice, color, font, fontsize):
@@ -106,7 +109,7 @@ def show_score(window, size, choice, color, font, fontsize):
     score_rect = score_surface.get_rect()
 
     if choice == 1:
-        score_rect.midtop = (size[0]/10, 15)
+        score_rect.midtop = (size[0]/8.5, size[1]/1.2)
     else:
         score_rect.midtop = (size[0]/2, size[1]/1.25)
 
@@ -125,9 +128,9 @@ def game_over(window, size):
 
     pygame.display.flip()
 
-    refresh_record(score)
+    record = refresh_record(score)
     show_score(window, size, 0, green, 'times', 20)
-    show_highscore(window, size, blue, 'times', 20)
+    show_highscore(window, size,0, blue, 'times', 20)
     pygame.display.flip()
     time.sleep(3)
     pygame.quit()
@@ -252,6 +255,7 @@ target_rect = pygame.Rect(target_x, target_y, target_size_width, target_size_hei
 main_window = Init(frame)
 last_damage_time = time.time()
 
+record = get_record()
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -323,6 +327,7 @@ while True:
             game_over(main_window, frame)
 
     show_score(main_window, frame, 1, white, 'consolas', 20)
+    show_highscore(main_window, frame ,1, blue, 'consolas', 20)
     draw_health_bar(main_window)
 
     if magnet_active and shrink_start_time and time.time() - shrink_start_time <= shrink_duration:
@@ -333,3 +338,7 @@ while True:
     pygame.display.update()
 
     fps_controller.tick(fps)
+    fpscnt += 1
+    if fpscnt>=150:
+        fpscnt = 0
+        snake_speed += 1
