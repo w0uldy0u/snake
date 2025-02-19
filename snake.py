@@ -171,6 +171,7 @@ def get_keyboard(key, cur_dir):
     return cur_dir
 
 def generate_food():
+    global food_positions
     # 일정 확률로 자기장 안에 음식을 생성
     if random.random() < food_spawn_probability:
         food_x = random.randint(target_rect.x, target_rect.x + target_rect.width - 10)
@@ -216,7 +217,7 @@ def generate_food():
     return food_positions
 
 def apply_item_effect(effect):
-    global score, health
+    global score, health,double_score_active, double_score_start_time
     if effect == "confuse":
         # 함수 추가
         print("confuse")
@@ -224,6 +225,8 @@ def apply_item_effect(effect):
     elif effect == "double_score":
         #함수 추가
         print("double_score")
+        double_score_active = True
+        double_score_start_time = time.time()
     
     elif effect == "hp_up":
         print("hp_up")
@@ -235,15 +238,24 @@ def apply_item_effect(effect):
     
     elif effect == "score_3":
         print("score_3")
-        score += 3
+        if double_score_active:
+            score += 6
+        else:
+            score += 3
     
     elif effect == "score_5":
         print("score_5")
-        score += 5
+        if double_score_active:
+            score += 10
+        else:
+            score += 5
     
     elif effect == "score_1":
         print("score_1")
-        score += 1
+        if double_score_active:
+            score += 2
+        else:
+            score += 1
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
     target_width = target_rect.width
@@ -398,9 +410,12 @@ while True:
             flag = 1
     if flag == -1:
         snake_body.pop()
-    check_double_score_item_collision()
+    #호정님 코드
+    #check_double_score_item_collision()
     if double_score_active:
         update_double_score_effect()
+        
+    #호정님 코드
 
     if food_gen_count >=1:
         food_gen_count -=1
