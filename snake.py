@@ -36,8 +36,8 @@ health = 10
 score = 0
 item_range = 10 #플레이어가 아이템을 먹을 수 있는 범위
 
-magnet_radius_width = frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
-magnet_radius_height = frame[1] * 1.2 
+magnet_radius_width = game_frame[0] * 1.1  # 초기 자기장 크기 화면 밖으로 설정
+magnet_radius_height = game_frame[1] * 1.1 
 magnet_decrease_rate = 5 #테스트용값
 magnet_active = False
 magnet_active_time = 2 #테스트용값
@@ -166,8 +166,8 @@ def generate_food():
     else:
         # 나머지지 확률로 화면 내 임의의 위치 생성
         food_pos = [
-            random.randrange(1, (frame[0]//10)) * 10,
-            random.randrange(1, (frame[1]//10)) * 10
+            random.randrange(1, (game_frame[0]//10)) * 10,
+            random.randrange(1, (game_frame[1]//10)) * 10
         ]
     return food_pos
 
@@ -186,21 +186,20 @@ def update_magnet_radius(current_width, current_height, target_rect, decrease_ra
     return current_width, current_height
 
 def draw_magnetic_field(window, current_width, current_height, target_rect):
-    outer_surface = pygame.Surface((frame[0], frame[1]), pygame.SRCALPHA)
+    outer_surface = pygame.Surface((frame[0], game_frame[1]), pygame.SRCALPHA)  # UI 제외
     outer_surface.fill((0, 0, 255, 50))
 
     inner_rect = pygame.Rect(
         target_rect.x + (target_rect.width - current_width) // 2,
         target_rect.y + (target_rect.height - current_height) // 2,
-        current_width, current_height
+        current_width, min(current_height, game_frame[1])  # UI 영역에 안 겹치게 제한
     )
 
     pygame.draw.rect(outer_surface, (0, 0, 0, 0), inner_rect)
-
     window.blit(outer_surface, (0, 0))
-
     pygame.draw.rect(window, (0, 0, 255), inner_rect, 3)
     pygame.draw.rect(window, (255, 255, 255), target_rect, 2)
+
 
 def draw_health_bar(window):
     global health
@@ -220,7 +219,7 @@ def update_health():
     global health
     if snake_pos[0] < 0 or snake_pos[0] > frame[0] - 10:
         health -= 10
-    if snake_pos[1] < 0 or snake_pos[1] > 470: 
+    if snake_pos[1] < 0 or snake_pos[1] > game_frame[1] - 10:
         health -= 10
     for block in snake_body[1:]:
         if snake_pos[0] == block[0] and snake_pos[1] == block[1]:
@@ -233,8 +232,8 @@ def update_health():
 # 목표 영역 크기 설정
 target_size_width = 500
 target_size_height = 380
-target_x = random.randint(50, frame[0] - target_size_width - 50)
-target_y = random.randint(50, frame[1] - target_size_height - 50)
+target_x = random.randint(50, game_frame[0] - target_size_width - 50)
+target_y = random.randint(50, game_frame[1] - target_size_height - 50)
 target_rect = pygame.Rect(target_x, target_y, target_size_width, target_size_height)
 
 main_window = Init(frame)
