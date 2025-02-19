@@ -26,6 +26,7 @@ snake_body = [[100 - (i * 10), 50] for i in range(10)]
 
 food_pos = [random.randrange(1, (game_frame[0]//10)) * 10,
             random.randrange(1, (game_frame[1]//10)) * 10]
+double_score_item_pos = [0,0]
 food_spawn = True
 
 direction = 'RIGHT'
@@ -36,6 +37,11 @@ paused = False
 health = 10
 score = 0
 item_range = 10 #플레이어가 아이템을 먹을 수 있는 범위
+
+double_score_active = False
+double_score_start_time = None
+double_score_duration = 8 #테스트용값
+
 
 magnet_radius_width = game_frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
 magnet_radius_height = game_frame[1] * 1.2 
@@ -243,6 +249,16 @@ def check_outside_magnet():
             health -= 1
             last_damage_time = current_time
 
+def check_double_score_item_collision():
+    global double_score_active, double_score_start_time
+    # 점수 2배 아이템 충돌 검사
+    if abs(snake_pos[0] - double_score_item_pos[0]) < item_range and abs(snake_pos[1] - double_score_item_pos[1]) < item_range:
+        double_score_active = True
+        double_score_start_time = time.time()
+        return True
+    return False
+
+
 # 목표 영역 크기 설정
 target_size_width = 500
 target_size_height = 380
@@ -293,6 +309,8 @@ while True:
     snake_body.insert(0, list(snake_pos))
     if abs(snake_pos[0] - food_pos[0]) < item_range and abs(snake_pos[1] - food_pos[1]) < item_range:
         score += 1
+        if double_score_active:
+            score += 1
         food_spawn = False
     else:
         snake_body.pop()
