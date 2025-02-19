@@ -8,7 +8,7 @@ import logging
 import os
 record = 0
 fpscnt = 0
-fps = 30 
+fps = 60
 frame = (720, 630)
 game_frame = (720, 480)
 
@@ -20,7 +20,8 @@ blue = pygame.Color(0, 0, 255)
 
 fps_controller = pygame.time.Clock()
 
-snake_speed = 5
+snake_speed = 3
+snake_acc = 0.01
 snake_pos = [100, 50]
 snake_body = [[100 - (i * 10), 50] for i in range(10)]
 
@@ -45,14 +46,14 @@ double_score_duration = 8 #테스트용값
 
 magnet_radius_width = game_frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
 magnet_radius_height = game_frame[1] * 1.2 
-magnet_decrease_rate = 5 #테스트용값
+magnet_decrease_rate = 3 #테스트용값
 magnet_active = False
-magnet_active_time = 2 #테스트용값
+magnet_active_time = 10 #테스트용값
 game_start_time = None
 shrink_start_time = None
-shrink_duration = 6  # 텍스트 UI 표시 시간 테스트용값
+shrink_duration = 5  # 텍스트 UI 표시 시간 테스트용값
 food_spawn_probability = 0.7 # 음식 자기장 안 생성 확률 테스트용값***
-safe_time = 0.3 # 자기장 밖에서 체력 닳는 주기 테스트용값**
+safe_time = 0.5 # 자기장 밖에서 체력 닳는 주기 테스트용값**
 
 def Init(size):
     check_errors = pygame.init()
@@ -368,4 +369,4 @@ while True:
     fpscnt += 1
     if fpscnt>=150:
         fpscnt = 0
-        snake_speed += 1
+        snake_speed += snake_acc
