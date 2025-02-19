@@ -391,12 +391,13 @@ def update_double_score_effect():
     if double_score_active and time.time() - double_score_start_time >= double_score_duration:
         double_score_active = False
 
-def draw_snake():
-    for i, segment in enumerate(snake_body[1:]):
-        x, y = segment[0], segment[1]
-        # 뱀 몸통 그리기
-        green_intensity = 255 - (i * 10)  # 뱀의 색상 그라디언트 효과
-        pygame.draw.rect(main_window, (green_intensity, 255, 0), pygame.Rect(x, y, 10, 10))
+# def draw_snake():
+#     for i, segment in enumerate(snake_body[1:]):
+#         x, y = segment[0], segment[1]
+#         # 뱀 몸통 그리기
+#         green_intensity = 255 - (i * 10)  # 뱀의 색상 그라디언트 효과
+#         pygame.draw.rect(main_window, (green_intensity, 255, 0), pygame.Rect(x, y, 10, 10))
+
 
 # 목표 영역 크기 설정
 target_size_width = 500
@@ -485,9 +486,9 @@ while True:
         magnet_radius_width, magnet_radius_height = update_magnet_radius(magnet_radius_width, magnet_radius_height, target_rect, magnet_decrease_rate)
 
     main_window.fill(black)
-    draw_snake()
-    # for pos in snake_body:
-    #     pygame.draw.rect(main_window, green, pygame.Rect(pos[0], pos[1], 10, 10))
+    # draw_snake()
+    for pos in snake_body:
+        pygame.draw.rect(main_window, green, pygame.Rect(pos[0], pos[1], 10, 10))
     '''
         for food in food_positions:
         if abs(snake_pos[0] - food["pos"][0]) < item_range and abs(snake_pos[1] - food["pos"][1]) < item_range:
