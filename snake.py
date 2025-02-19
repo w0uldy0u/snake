@@ -306,7 +306,7 @@ def remove_expired_items():
     global food_positions, food_gen_count
     current_time = time.time()
     for food in food_positions:
-        if current_time - food["time"] >= 5:
+        if current_time - food["time"] >= 10:
             food_positions.remove(food)
             food_gen_count += 1
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
