@@ -50,7 +50,7 @@ double_score_duration = 8 #테스트용값
 
 reverse_active = False
 reverse_active_start_time = None
-reverse_active_duration = 8
+reverse_active_duration = 5
 
 
 
@@ -64,6 +64,11 @@ shrink_start_time = None
 shrink_duration = 5  # 텍스트 UI 표시 시간 테스트용값
 food_spawn_probability = 0.7 # 음식 자기장 안 생성 확률 테스트용값***
 safe_time = 0.5 # 자기장 밖에서 체력 닳는 주기 테스트용값**
+
+pygame.mixer.init()
+
+confuse_sfx = pygame.mixer.Sound("sound/affecting.ogg")
+confuse_sfx.set_volume(0.2)
 
 def Init(size):
     check_errors = pygame.init()
@@ -293,6 +298,7 @@ def is_reverse(direction):
             elif direction == 'RIGHT':
                 direction = 'LEFT'
         else:
+            confuse_sfx.stop()
             reverse_active = False 
     
     return direction
@@ -301,6 +307,7 @@ def apply_item_effect(effect):
     if effect == "confuse":
         # 함수 추가
         print("confuse")
+        confuse_sfx.play()
         direction_reverse_item()
     
     elif effect == "double_score":
@@ -432,10 +439,15 @@ def update_double_score_effect():
 def draw_body():
     for i, segment in enumerate(snake_body[1:]):
         x, y = segment[0], segment[1]
-        # 초록에서 노란색으로 변하는 그라디언트
-        green_intensity = max(0, 255 - (i * 10))  # 초록색은 점점 줄어듦
-        red_intensity = min(255, i * 10)  # 빨간색은 점점 증가
-        color = pygame.Color(red_intensity, 255, 0)  # (R, G, B) 색상 설정 (노란색에 가까워짐)
+
+        if reverse_active:
+            color = pygame.Color(255, 0, 0)  # 빨간색
+        else:
+            # 초록에서 노란색으로 변하는 그라디언트
+            green_intensity = max(0, 255 - (i * 10))  # 초록색 감소
+            red_intensity = min(255, i * 10)  # 빨간색 증가
+            color = pygame.Color(red_intensity, 255, 0)  # (R, G, B)
+
         pygame.draw.rect(main_window, color, pygame.Rect(x, y, 10, 10))
 
 
