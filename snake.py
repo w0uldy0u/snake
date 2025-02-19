@@ -96,9 +96,9 @@ def show_highscore(window, size, choice, color, font, fontsize):
     score_font = pygame.font.SysFont(font, fontsize)
     score_surface = score_font.render('High Score : ' + str(record), True, color)
     score_rect = score_surface.get_rect()
-    score_rect.midtop = (size[0]/2, size[1]/1.15)#size[1]/1.25
+
     if choice == 1:
-        score_rect.midtop = (size[0]/8.5, size[1]/1.15)
+        score_rect.midleft = (10, size[1]/1.15)
     else:
         score_rect.midtop = (size[0]/2, size[1]/1.15)
 
@@ -110,7 +110,7 @@ def show_score(window, size, choice, color, font, fontsize):
     score_rect = score_surface.get_rect()
 
     if choice == 1:
-        score_rect.midtop = (size[0]/8.5, size[1]/1.2)
+        score_rect.midleft = (10, size[1]/1.2)
     else:
         score_rect.midtop = (size[0]/2, size[1]/1.25)
 
@@ -125,13 +125,12 @@ def game_over(window, size):
     window.fill(black)
     window.blit(game_over_surface, game_over_rect)
 
-    show_score(window, size, 0, green, 'times', 20)
 
     pygame.display.flip()
 
     record = refresh_record(score)
-    show_score(window, size, 0, green, 'times', 20)
-    show_highscore(window, size,0, blue, 'times', 20)
+    show_score(window, size, 0, white, 'times', 20)
+    show_highscore(window, size,0, green, 'times', 20)
     pygame.display.flip()
     time.sleep(3)
     pygame.quit()
@@ -326,7 +325,7 @@ while True:
             game_over(main_window, frame)
 
     show_score(main_window, frame, 1, white, 'consolas', 20)
-    show_highscore(main_window, frame ,1, blue, 'consolas', 20)
+    show_highscore(main_window, frame ,1, green, 'consolas', 20)
     draw_health_bar(main_window)
 
     if magnet_active and shrink_start_time and time.time() - shrink_start_time <= shrink_duration:
