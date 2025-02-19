@@ -48,6 +48,11 @@ double_score_active = False
 double_score_start_time = None
 double_score_duration = 8 #테스트용값
 
+reverse_active = False
+reverse_active_start_time = None
+reverse_active_duration = 8
+
+
 
 magnet_radius_width = game_frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
 magnet_radius_height = game_frame[1] * 1.2 
@@ -261,12 +266,42 @@ def generate_food():
             food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1","time":created_time})  # 3×3 크기
     print("food_pos : ",food_positions)
     return food_positions
-
+def direction_reverse_item():
+    global reverse_active, reverse_active_start_time, reverse_active_duration
+    current_time = time.time()
+    reverse_active = True
+    reverse_active_start_time = current_time
+    #반전 활성
+    #if snake_pos == reverse_item_pos:
+    #    reverse_active = True
+    #    reverse_start_time = current_time
+    #    reverse_item_pos = [random.randint(0, game_frame[0] // 10) * 10,
+    #                        random.randint(0, game_frame[1] // 10) * 10]
+    
+    #반전 해제
+def is_reverse(direction):
+    global reverse_active, reverse_active_start_time, reverse_active_duration
+    current_time = time.time()
+    if reverse_active:
+        if current_time - reverse_active_start_time < reverse_active_duration:
+            if direction == 'UP':
+                direction = 'DOWN'
+            elif direction == 'DOWN':
+                direction = 'UP'
+            elif direction == 'LEFT':
+                direction = 'RIGHT'
+            elif direction == 'RIGHT':
+                direction = 'LEFT'
+        else:
+            reverse_active = False 
+    
+    return direction
 def apply_item_effect(effect):
     global score, health,double_score_active, double_score_start_time
     if effect == "confuse":
         # 함수 추가
         print("confuse")
+        direction_reverse_item()
     
     elif effect == "double_score":
         #함수 추가
@@ -302,6 +337,7 @@ def apply_item_effect(effect):
             score += 2
         else:
             score += 1
+            
 def remove_expired_items():
     global food_positions, food_gen_count
     current_time = time.time()
@@ -426,6 +462,7 @@ while True:
             else:
                 if not paused:
                     direction = get_keyboard(event.key, direction)
+                    direction = is_reverse(direction)
 
     if game_start_time is None:
         game_start_time = time.time()
