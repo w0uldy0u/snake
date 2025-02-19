@@ -191,7 +191,7 @@ def game_over(window, size):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_r: 
                     restart_game()
-                    main_bg.play(loops=1)
+                    main_bg.play(loops=-1)
                     waiting_for_input = False
                 elif event.key == pygame.K_q: 
                     pygame.quit()
@@ -528,7 +528,7 @@ last_damage_time = time.time()
 
 record = get_record()
 
-main_bg.play(loops=1)
+main_bg.play(loops=-1)
 
 while True:
     remove_expired_items()
