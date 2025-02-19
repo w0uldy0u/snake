@@ -30,9 +30,10 @@ food_pos = [random.randrange(1, (game_frame[0]//10)) * 10,
 double_score_item_pos = [0,0]
 food_spawn = True
 food_gen_count = 0
-food_positions = [{"pos":[random.randrange(1, (game_frame[0] // 10)) * 10, random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (20, 20), "effect": "score_3"},
-                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10 ],"color": white, "size": (10, 10), "effect": "score_5"},
-                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (30, 30), "effect": "score_1"}]
+inittime = time.time()
+food_positions = [{"pos":[random.randrange(1, (game_frame[0] // 10)) * 10, random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (20, 20), "effect": "score_3","time":inittime},
+                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10 ],"color": white, "size": (10, 10), "effect": "score_5","time":inittime},
+                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (30, 30), "effect": "score_1","time":inittime}]
 
 direction = 'RIGHT'
 
@@ -173,6 +174,7 @@ def get_keyboard(key, cur_dir):
 
 def generate_food():
     global food_positions
+    created_time = time.time() # 현재 시간
     # 일정 확률로 자기장 안에 음식을 생성
     if random.random() < food_spawn_probability:
         food_x = random.randint(target_rect.x, target_rect.x + target_rect.width - 10)
@@ -181,19 +183,19 @@ def generate_food():
         x = food_x // 10 * 10
         y = food_y // 10 * 10
         if item_type == "confuse":
-            food_positions.append({"pos": [x, y], "color": green, "size": (10, 10), "effect": "confuse"})
+            food_positions.append({"pos": [x, y], "color": green, "size": (10, 10), "effect": "confuse","time":created_time})
         elif item_type == "double_score":
-            food_positions.append({"pos": [x, y], "color": blue, "size": (10, 10), "effect": "double_score"})
+            food_positions.append({"pos": [x, y], "color": blue, "size": (10, 10), "effect": "double_score","time":created_time})
         elif item_type == "hp_up":
-            food_positions.append({"pos": [x, y], "color": red, "size": (10, 10), "effect": "hp_up"})
+            food_positions.append({"pos": [x, y], "color": red, "size": (10, 10), "effect": "hp_up","time":created_time})
         elif item_type == "hp_down":
-            food_positions.append({"pos": [x, y], "color": yellow, "size": (10, 10), "effect": "hp_down"})
+            food_positions.append({"pos": [x, y], "color": yellow, "size": (10, 10), "effect": "hp_down","time":created_time})
         elif item_type == "score_3":
-            food_positions.append({"pos": [x, y], "color": white, "size": (20, 20), "effect": "score_3"})  # 2×2 크기
+            food_positions.append({"pos": [x, y], "color": white, "size": (20, 20), "effect": "score_3","time":created_time})  # 2×2 크기
         elif item_type == "score_5":
-            food_positions.append({"pos": [x, y], "color": white, "size": (10, 10), "effect": "score_5"})  # 1×1 크기
+            food_positions.append({"pos": [x, y], "color": white, "size": (10, 10), "effect": "score_5","time":created_time})  # 1×1 크기
         elif item_type == "score_1":
-            food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1"})  # 3×3 크기
+            food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1","time":created_time})  # 3×3 크기
         #food_positions.append({"pos":[food_x // 10 * 10, food_y // 10 * 10], "color":})
     else:
         # 나머지 확률로 화면 내 임의의 위치 생성
@@ -201,19 +203,19 @@ def generate_food():
         y = random.randrange(1, (game_frame[1] // 10)) * 10
         item_type = random.choice(["confuse", "double_score", "hp_up", "hp_down", "score_3", "score_5", "score_1"])
         if item_type == "confuse":
-            food_positions.append({"pos": [x, y], "color": green, "size": (10, 10), "effect": "confuse"})
+            food_positions.append({"pos": [x, y], "color": green, "size": (10, 10), "effect": "confuse","time":created_time})
         elif item_type == "double_score":
-            food_positions.append({"pos": [x, y], "color": blue, "size": (10, 10), "effect": "double_score"})
+            food_positions.append({"pos": [x, y], "color": blue, "size": (10, 10), "effect": "double_score","time":created_time})
         elif item_type == "hp_up":
-            food_positions.append({"pos": [x, y], "color": red, "size": (10, 10), "effect": "hp_up"})
+            food_positions.append({"pos": [x, y], "color": red, "size": (10, 10), "effect": "hp_up","time":created_time})
         elif item_type == "hp_down":
-            food_positions.append({"pos": [x, y], "color": yellow, "size": (10, 10), "effect": "hp_down"})
+            food_positions.append({"pos": [x, y], "color": yellow, "size": (10, 10), "effect": "hp_down","time":created_time})
         elif item_type == "score_3":
-            food_positions.append({"pos": [x, y], "color": white, "size": (20, 20), "effect": "score_3"})  # 2×2 크기
+            food_positions.append({"pos": [x, y], "color": white, "size": (20, 20), "effect": "score_3","time":created_time})  # 2×2 크기
         elif item_type == "score_5":
-            food_positions.append({"pos": [x, y], "color": white, "size": (10, 10), "effect": "score_5"})  # 1×1 크기
+            food_positions.append({"pos": [x, y], "color": white, "size": (10, 10), "effect": "score_5","time":created_time})  # 1×1 크기
         elif item_type == "score_1":
-            food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1"})  # 3×3 크기
+            food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1","time":created_time})  # 3×3 크기
     print("food_pos : ",food_positions)
     return food_positions
 
@@ -257,7 +259,13 @@ def apply_item_effect(effect):
             score += 2
         else:
             score += 1
-
+def remove_expired_items():
+    global food_positions, food_gen_count
+    current_time = time.time()
+    for food in food_positions:
+        if current_time - food["time"] >= 5:
+            food_positions.remove(food)
+            food_gen_count += 1
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
     target_width = target_rect.width
     target_height = target_rect.height
@@ -356,6 +364,7 @@ last_damage_time = time.time()
 
 record = get_record()
 while True:
+    remove_expired_items()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
