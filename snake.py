@@ -29,12 +29,12 @@ food_pos = [random.randrange(1, (game_frame[0]//10)) * 10,
             random.randrange(1, (game_frame[1]//10)) * 10]
 double_score_item_pos = [0,0]
 food_spawn = True
-food_gen_count = 0
+food_gen_count = 3
 inittime = time.time()
-food_positions = [{"pos":[random.randrange(1, (game_frame[0] // 10)) * 10, random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (20, 20), "effect": "score_3","time":inittime},
-                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10 ],"color": white, "size": (10, 10), "effect": "score_5","time":inittime},
-                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (30, 30), "effect": "score_1","time":inittime}]
-
+#food_positions = [{"pos":[random.randrange(1, (game_frame[0] // 10)) * 10, random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (20, 20), "effect": "score_3","time":inittime},
+#                 {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10 ],"color": white, "size": (10, 10), "effect": "score_5","time":inittime},
+#                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (30, 30), "effect": "score_1","time":inittime}]
+food_positions = []
 direction = 'RIGHT'
 
 # 일시정지 상태 변수
@@ -170,7 +170,7 @@ def game_over(window, size):
 #게임 상태 초기화 함수
 def restart_game():
     global score, health, snake_pos, snake_body, food_positions, direction, food_gen_count, double_score_active, double_score_start_time, magnet_active, magnet_radius_width, magnet_radius_height, shrink_start_time, last_damage_time
-    
+    global food_gen_count
     score = 0
     health = 10
     snake_pos = [100, 50]
@@ -185,6 +185,8 @@ def restart_game():
     magnet_radius_height = game_frame[1] * 1.2
     shrink_start_time = None
     last_damage_time = time.time()
+
+    food_gen_count = 3
 
     global game_start_time
     game_start_time = None
