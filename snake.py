@@ -256,7 +256,14 @@ def check_double_score_item_collision():
         double_score_active = True
         double_score_start_time = time.time()
         return True
-    return False
+    return 
+
+def update_double_score_effect():
+    global double_score_active, double_score_start_time
+    # 2배 효과 시간이 끝났으면 비활성화
+    if double_score_active and time.time() - double_score_start_time >= double_score_duration:
+        double_score_active = False
+
 
 
 # 목표 영역 크기 설정
