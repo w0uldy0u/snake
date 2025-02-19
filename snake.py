@@ -51,7 +51,7 @@ double_score_duration = 8 #테스트용값
 
 magnet_radius_width = game_frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
 magnet_radius_height = game_frame[1] * 1.2 
-magnet_decrease_rate = 3 #테스트용값
+magnet_decrease_rate = 1.5 #테스트용값
 magnet_active = False
 magnet_active_time = 10 #테스트용값
 game_start_time = None
