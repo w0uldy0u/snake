@@ -46,6 +46,7 @@ game_start_time = None
 shrink_start_time = None
 shrink_duration = 6  # 텍스트 UI 표시 시간 테스트용값
 food_spawn_probability = 0.7 # 음식 자기장 안 생성 확률 테스트용값***
+safe_time = 0.3 # 자기장 밖에서 체력 닳는 주기 테스트용값**
 
 def Init(size):
     check_errors = pygame.init()
@@ -190,7 +191,8 @@ def update_magnet_radius(current_width, current_height, target_rect, decrease_ra
 
 def draw_magnetic_field(window, current_width, current_height, target_rect):
     outer_surface = pygame.Surface((frame[0], game_frame[1]), pygame.SRCALPHA)  # UI 제외
-    outer_surface.fill((0, 0, 255, 50))
+    if magnet_active:
+        outer_surface.fill((0, 0, 255, 50))
 
     inner_rect = pygame.Rect(
         target_rect.x + (target_rect.width - current_width) // 2,
@@ -200,7 +202,8 @@ def draw_magnetic_field(window, current_width, current_height, target_rect):
 
     pygame.draw.rect(outer_surface, (0, 0, 0, 0), inner_rect)
     window.blit(outer_surface, (0, 0))
-    pygame.draw.rect(window, (0, 0, 255), inner_rect, 3)
+    if magnet_active:
+        pygame.draw.rect(window, (0, 0, 255), inner_rect, 3)
     pygame.draw.rect(window, (255, 255, 255), target_rect, 2)
 
 
@@ -237,13 +240,9 @@ def check_outside_magnet():
     if not inner_rect.collidepoint(snake_pos):
         current_time = time.time()
         
-        # 0.5초마다 체력 감소
-        if current_time - last_damage_time >= 0.5:
+        if current_time - last_damage_time >= safe_time:
             health -= 1
             last_damage_time = current_time
-
-
-    
 
 # 목표 영역 크기 설정
 target_size_width = 500
