@@ -26,6 +26,7 @@ snake_body = [[100 - (i * 10), 50] for i in range(10)]
 
 food_pos = [random.randrange(1, (game_frame[0]//10)) * 10,
             random.randrange(1, (game_frame[1]//10)) * 10]
+double_score_item_pos = [0,0]
 food_spawn = True
 food_gen_count = 0
 food_positions = [{"pos":[random.randrange(1, (game_frame[0] // 10)) * 10, random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (20, 20), "effect": "score_3"},
@@ -41,6 +42,11 @@ health = 10
 score = 0
 item_range = 10 #플레이어가 아이템을 먹을 수 있는 범위
 
+double_score_active = False
+double_score_start_time = None
+double_score_duration = 8 #테스트용값
+
+
 magnet_radius_width = game_frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
 magnet_radius_height = game_frame[1] * 1.2 
 magnet_decrease_rate = 5 #테스트용값
@@ -50,6 +56,7 @@ game_start_time = None
 shrink_start_time = None
 shrink_duration = 6  # 텍스트 UI 표시 시간 테스트용값
 food_spawn_probability = 0.7 # 음식 자기장 안 생성 확률 테스트용값***
+safe_time = 0.3 # 자기장 밖에서 체력 닳는 주기 테스트용값**
 
 def Init(size):
     check_errors = pygame.init()
@@ -99,9 +106,9 @@ def show_highscore(window, size, choice, color, font, fontsize):
     score_font = pygame.font.SysFont(font, fontsize)
     score_surface = score_font.render('High Score : ' + str(record), True, color)
     score_rect = score_surface.get_rect()
-    score_rect.midtop = (size[0]/2, size[1]/1.15)#size[1]/1.25
+
     if choice == 1:
-        score_rect.midtop = (size[0]/8.5, size[1]/1.15)
+        score_rect.midleft = (10, size[1]/1.15)
     else:
         score_rect.midtop = (size[0]/2, size[1]/1.15)
 
@@ -113,7 +120,7 @@ def show_score(window, size, choice, color, font, fontsize):
     score_rect = score_surface.get_rect()
 
     if choice == 1:
-        score_rect.midtop = (size[0]/8.5, size[1]/1.2)
+        score_rect.midleft = (10, size[1]/1.2)
     else:
         score_rect.midtop = (size[0]/2, size[1]/1.25)
 
@@ -128,13 +135,12 @@ def game_over(window, size):
     window.fill(black)
     window.blit(game_over_surface, game_over_rect)
 
-    show_score(window, size, 0, green, 'times', 20)
 
     pygame.display.flip()
 
     record = refresh_record(score)
-    show_score(window, size, 0, green, 'times', 20)
-    show_highscore(window, size,0, blue, 'times', 20)
+    show_score(window, size, 0, white, 'times', 20)
+    show_highscore(window, size,0, green, 'times', 20)
     pygame.display.flip()
     time.sleep(3)
     pygame.quit()
@@ -255,7 +261,8 @@ def update_magnet_radius(current_width, current_height, target_rect, decrease_ra
 
 def draw_magnetic_field(window, current_width, current_height, target_rect):
     outer_surface = pygame.Surface((frame[0], game_frame[1]), pygame.SRCALPHA)  # UI 제외
-    outer_surface.fill((0, 0, 255, 50))
+    if magnet_active:
+        outer_surface.fill((0, 0, 255, 50))
 
     inner_rect = pygame.Rect(
         target_rect.x + (target_rect.width - current_width) // 2,
@@ -265,7 +272,8 @@ def draw_magnetic_field(window, current_width, current_height, target_rect):
 
     pygame.draw.rect(outer_surface, (0, 0, 0, 0), inner_rect)
     window.blit(outer_surface, (0, 0))
-    pygame.draw.rect(window, (0, 0, 255), inner_rect, 3)
+    if magnet_active:
+        pygame.draw.rect(window, (0, 0, 255), inner_rect, 3)
     pygame.draw.rect(window, (255, 255, 255), target_rect, 2)
 
 
@@ -285,17 +293,43 @@ def draw_health_bar(window):
 #체력 실시간 업데이트
 def update_health():
     global health
-    if snake_pos[0] < 0 or snake_pos[0] > frame[0] - 10:
-        health -= 10
-    if snake_pos[1] < 0 or snake_pos[1] > game_frame[1] - 10:
-        health -= 10
-    for block in snake_body[1:]:
-        if snake_pos[0] == block[0] and snake_pos[1] == block[1]:
-            health -= 2
-            break
+    check_outside_magnet()
+
     if health <= 0:
         game_over(main_window, frame)
-    
+
+def check_outside_magnet():
+    global health, last_damage_time
+
+    inner_rect = pygame.Rect(
+        target_rect.x + (target_rect.width - magnet_radius_width) // 2,
+        target_rect.y + (target_rect.height - magnet_radius_height) // 2,
+        magnet_radius_width, magnet_radius_height
+    )
+
+    if not inner_rect.collidepoint(snake_pos):
+        current_time = time.time()
+        
+        if current_time - last_damage_time >= safe_time:
+            health -= 1
+            last_damage_time = current_time
+
+def check_double_score_item_collision():
+    global double_score_active, double_score_start_time
+    # 점수 2배 아이템 충돌 검사
+    if abs(snake_pos[0] - double_score_item_pos[0]) < item_range and abs(snake_pos[1] - double_score_item_pos[1]) < item_range:
+        double_score_active = True
+        double_score_start_time = time.time()
+        return True
+    return 
+
+def update_double_score_effect():
+    global double_score_active, double_score_start_time
+    # 2배 효과 시간이 끝났으면 비활성화
+    if double_score_active and time.time() - double_score_start_time >= double_score_duration:
+        double_score_active = False
+
+
 
 # 목표 영역 크기 설정
 target_size_width = 500
@@ -305,6 +339,8 @@ target_y = random.randint(50, game_frame[1] - target_size_height - 50)
 target_rect = pygame.Rect(target_x, target_y, target_size_width, target_size_height)
 
 main_window = Init(frame)
+last_damage_time = time.time()
+
 record = get_record()
 while True:
     for event in pygame.event.get():
@@ -362,6 +398,10 @@ while True:
             flag = 1
     if flag == -1:
         snake_body.pop()
+    check_double_score_item_collision()
+    if double_score_active:
+        update_double_score_effect()
+
     if food_gen_count >=1:
         food_gen_count -=1
         generate_food()
@@ -397,7 +437,7 @@ while True:
 
     draw_magnetic_field(main_window, magnet_radius_width, magnet_radius_height, target_rect)
 
-    if snake_pos[0] < 0 or snake_pos[0] > frame[0] - 10 or snake_pos[1] < 0 or snake_pos[1] > frame[1] - 10:
+    if snake_pos[0] < 0 or snake_pos[0] > game_frame[0] - 10 or snake_pos[1] < 0 or snake_pos[1] > game_frame[1] - 10:
         game_over(main_window, frame)
 
     for block in snake_body[1:]:
@@ -405,14 +445,14 @@ while True:
             game_over(main_window, frame)
 
     show_score(main_window, frame, 1, white, 'consolas', 20)
-    show_highscore(main_window, frame ,1, blue, 'consolas', 20)
+    show_highscore(main_window, frame ,1, green, 'consolas', 20)
     draw_health_bar(main_window)
 
     if magnet_active and shrink_start_time and time.time() - shrink_start_time <= shrink_duration:
         font = pygame.font.SysFont('times new roman', 25)
         text_surface = font.render("Magnetic Field is Shrinking!", True, white)
         main_window.blit(text_surface, (frame[0] // 2 - text_surface.get_width() // 2, 10))
-
+    
     pygame.display.update()
 
     fps_controller.tick(fps)
