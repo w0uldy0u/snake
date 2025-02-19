@@ -17,7 +17,7 @@ white = pygame.Color(255, 255, 255)
 red = pygame.Color(255, 0, 0)
 green = pygame.Color(0, 255, 0)
 blue = pygame.Color(0, 0, 255)
-
+yellow = pygame.Color(255, 255, 0)
 fps_controller = pygame.time.Clock()
 
 snake_speed = 5
@@ -27,6 +27,10 @@ snake_body = [[100 - (i * 10), 50] for i in range(10)]
 food_pos = [random.randrange(1, (game_frame[0]//10)) * 10,
             random.randrange(1, (game_frame[1]//10)) * 10]
 food_spawn = True
+food_gen_count = 0
+food_positions = [{"pos":[random.randrange(1, (game_frame[0] // 10)) * 10, random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (20, 20), "effect": "score_3"},
+                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10 ],"color": white, "size": (10, 10), "effect": "score_5"},
+                  {"pos":[random.randrange(1, (game_frame[0] // 10)) * 10,random.randrange(1, (game_frame[1] // 10)) * 10  ],"color": white, "size": (30, 30), "effect": "score_1"}]
 
 direction = 'RIGHT'
 
@@ -165,14 +169,75 @@ def generate_food():
     if random.random() < food_spawn_probability:
         food_x = random.randint(target_rect.x, target_rect.x + target_rect.width - 10)
         food_y = random.randint(target_rect.y, target_rect.y + target_rect.height - 10)
-        food_pos = [food_x // 10 * 10, food_y // 10 * 10]
+        item_type = random.choice(["confuse", "double_score", "hp_up", "hp_down", "score_3", "score_5", "score_1"])
+        x = food_x // 10 * 10
+        y = food_y // 10 * 10
+        if item_type == "confuse":
+            food_positions.append({"pos": [x, y], "color": green, "size": (10, 10), "effect": "confuse"})
+        elif item_type == "double_score":
+            food_positions.append({"pos": [x, y], "color": blue, "size": (10, 10), "effect": "double_score"})
+        elif item_type == "hp_up":
+            food_positions.append({"pos": [x, y], "color": red, "size": (10, 10), "effect": "hp_up"})
+        elif item_type == "hp_down":
+            food_positions.append({"pos": [x, y], "color": yellow, "size": (10, 10), "effect": "hp_down"})
+        elif item_type == "score_3":
+            food_positions.append({"pos": [x, y], "color": white, "size": (20, 20), "effect": "score_3"})  # 2×2 크기
+        elif item_type == "score_5":
+            food_positions.append({"pos": [x, y], "color": white, "size": (10, 10), "effect": "score_5"})  # 1×1 크기
+        elif item_type == "score_1":
+            food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1"})  # 3×3 크기
+        #food_positions.append({"pos":[food_x // 10 * 10, food_y // 10 * 10], "color":})
     else:
         # 나머지 확률로 화면 내 임의의 위치 생성
-        food_pos = [
-        random.randrange(1, (game_frame[0] // 10)) * 10,  # x 좌표 (720px 내)
-        random.randrange(1, (game_frame[1] // 10)) * 10  # y 좌표 (480px 내)
-        ]
-    return food_pos
+        x = random.randrange(1, (game_frame[0] // 10)) * 10
+        y = random.randrange(1, (game_frame[1] // 10)) * 10
+        item_type = random.choice(["confuse", "double_score", "hp_up", "hp_down", "score_3", "score_5", "score_1"])
+        if item_type == "confuse":
+            food_positions.append({"pos": [x, y], "color": green, "size": (10, 10), "effect": "confuse"})
+        elif item_type == "double_score":
+            food_positions.append({"pos": [x, y], "color": blue, "size": (10, 10), "effect": "double_score"})
+        elif item_type == "hp_up":
+            food_positions.append({"pos": [x, y], "color": red, "size": (10, 10), "effect": "hp_up"})
+        elif item_type == "hp_down":
+            food_positions.append({"pos": [x, y], "color": yellow, "size": (10, 10), "effect": "hp_down"})
+        elif item_type == "score_3":
+            food_positions.append({"pos": [x, y], "color": white, "size": (20, 20), "effect": "score_3"})  # 2×2 크기
+        elif item_type == "score_5":
+            food_positions.append({"pos": [x, y], "color": white, "size": (10, 10), "effect": "score_5"})  # 1×1 크기
+        elif item_type == "score_1":
+            food_positions.append({"pos": [x, y], "color": white, "size": (30, 30), "effect": "score_1"})  # 3×3 크기
+    print("food_pos : ",food_positions)
+    return food_positions
+
+def apply_item_effect(effect):
+    global score, health
+    if effect == "confuse":
+        # 함수 추가
+        print("confuse")
+    
+    elif effect == "double_score":
+        #함수 추가
+        print("double_score")
+    
+    elif effect == "hp_up":
+        print("hp_up")
+        health = min(10, health + 2)  # 최대 HP 제한
+    
+    elif effect == "hp_down":
+        print("hp_down")
+        health = max(0, health - 2)  # 최소 HP 제한
+    
+    elif effect == "score_3":
+        print("score_3")
+        score += 3
+    
+    elif effect == "score_5":
+        print("score_5")
+        score += 5
+    
+    elif effect == "score_1":
+        print("score_1")
+        score += 1
 
 def update_magnet_radius(current_width, current_height, target_rect, decrease_rate):
     target_width = target_rect.width
@@ -278,16 +343,33 @@ while True:
         snake_pos[0] += snake_speed
 
     snake_body.insert(0, list(snake_pos))
-    if abs(snake_pos[0] - food_pos[0]) < item_range and abs(snake_pos[1] - food_pos[1]) < item_range:
-        score += 1
-        food_spawn = False
-    else:
+    # 고쳐야되는 부분{
+    flag = -1
+    '''
+    for i in range(len(food_positions)):
+        if abs(snake_pos[0] - food_positions[i][0]) < item_range and abs(snake_pos[1] - food_positions[i][1]) < item_range:
+            score += 1
+            food_positions.pop(i)
+            food_gen_count +=1
+            flag = 1
+    #만약 음식을 먹지 않았다면
+    '''
+    for food in food_positions:
+        if abs(snake_pos[0] - food["pos"][0]) < item_range and abs(snake_pos[1] - food["pos"][1]) < item_range:
+            apply_item_effect(food["effect"])
+            food_positions.remove(food)
+            food_gen_count += 1
+            flag = 1
+    if flag == -1:
         snake_body.pop()
+    if food_gen_count >=1:
+        food_gen_count -=1
+        generate_food()
 
-    if not food_spawn:
-        food_pos = generate_food()
-    food_spawn = True
-
+    # if not food_spawn:
+    #    food_pos = generate_food()
+    #food_spawn = True
+    #}
     if magnet_active:
         magnet_radius_width, magnet_radius_height = update_magnet_radius(magnet_radius_width, magnet_radius_height, target_rect, magnet_decrease_rate)
 
@@ -295,8 +377,19 @@ while True:
 
     for pos in snake_body:
         pygame.draw.rect(main_window, green, pygame.Rect(pos[0], pos[1], 10, 10))
+    '''
+        for food in food_positions:
+        if abs(snake_pos[0] - food["pos"][0]) < item_range and abs(snake_pos[1] - food["pos"][1]) < item_range:
+            apply_item_effect(food["effect"])
+            food_positions.remove(food)
+            food_gen_count += 1
+            flag = 1
+        '''
+    #for i in range(len(food_positions)):
+    #    pygame.draw.rect(main_window, white, pygame.Rect(food_positions[i][0], food_positions[i][1], 10, 10))
+    for food in food_positions:
+        pygame.draw.rect(main_window, food["color"], pygame.Rect(food["pos"][0], food["pos"][1], food["size"][0], food["size"][1]))
 
-    pygame.draw.rect(main_window, white, pygame.Rect(food_pos[0], food_pos[1], 10, 10))
 
     update_health()
     pygame.draw.line(main_window, white, (0, 480), (frame[0], 480), 5)
