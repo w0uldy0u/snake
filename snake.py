@@ -210,15 +210,50 @@ def pause_screen(window,size):
     window.blit(pause_surface, pause_rect)
 
 def get_keyboard(key, cur_dir):
-    if direction != 'DOWN' and key == pygame.K_UP or key == ord('w'):
-        return 'UP'
-    if direction != 'UP' and key == pygame.K_DOWN or key == ord('s'):
-        return 'DOWN'
-    if direction != 'RIGHT' and key == pygame.K_LEFT or key == ord('a'):
-        return 'LEFT'
-    if direction != 'LEFT' and key == pygame.K_RIGHT or key == ord('d'):
-        return 'RIGHT'
+    global reverse_active, reverse_active_start_time, reverse_active_duration
+    current_time = time.time()
+    if reverse_active:
+        if current_time - reverse_active_start_time < reverse_active_duration:
+            if direction != 'UP' and key == pygame.K_UP or key == ord('w'):
+                return 'DOWN'
+            if direction != 'DOWN' and key == pygame.K_DOWN or key == ord('s'):
+                return 'UP'
+            if direction != 'LEFT' and key == pygame.K_LEFT or key == ord('a'):
+                return 'RIGHT'
+            if direction != 'RIGHT' and key == pygame.K_RIGHT or key == ord('d'):
+                return 'LEFT'
+        else :
+            reverse_active = False 
+
+    else:
+        if direction != 'DOWN' and key == pygame.K_UP or key == ord('w'):
+            return 'UP'
+        if direction != 'UP' and key == pygame.K_DOWN or key == ord('s'):
+            return 'DOWN'
+        if direction != 'RIGHT' and key == pygame.K_LEFT or key == ord('a'):
+            return 'LEFT'
+        if direction != 'LEFT' and key == pygame.K_RIGHT or key == ord('d'):
+            return 'RIGHT'
     return cur_dir
+'''
+def is_reverse(direction):
+    global reverse_active, reverse_active_start_time, reverse_active_duration
+    current_time = time.time()
+    if reverse_active:
+        if current_time - reverse_active_start_time < reverse_active_duration:
+            if direction == 'UP':
+                direction = 'DOWN'
+            elif direction == 'DOWN':
+                direction = 'UP'
+            elif direction == 'LEFT':
+                direction = 'RIGHT'
+            elif direction == 'RIGHT':
+                direction = 'LEFT'
+        else:
+            reverse_active = False 
+    
+    return direction
+'''
 
 def generate_food():
     global food_positions
@@ -279,23 +314,7 @@ def direction_reverse_item():
     #                        random.randint(0, game_frame[1] // 10) * 10]
     
     #반전 해제
-def is_reverse(direction):
-    global reverse_active, reverse_active_start_time, reverse_active_duration
-    current_time = time.time()
-    if reverse_active:
-        if current_time - reverse_active_start_time < reverse_active_duration:
-            if direction == 'UP':
-                direction = 'DOWN'
-            elif direction == 'DOWN':
-                direction = 'UP'
-            elif direction == 'LEFT':
-                direction = 'RIGHT'
-            elif direction == 'RIGHT':
-                direction = 'LEFT'
-        else:
-            reverse_active = False 
-    
-    return direction
+
 def apply_item_effect(effect):
     global score, health,double_score_active, double_score_start_time
     if effect == "confuse":
@@ -465,7 +484,6 @@ while True:
             else:
                 if not paused:
                     direction = get_keyboard(event.key, direction)
-                    direction = is_reverse(direction)
 
     if game_start_time is None:
         game_start_time = time.time()
