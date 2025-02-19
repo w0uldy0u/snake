@@ -23,8 +23,8 @@ snake_speed = 5
 snake_pos = [100, 50]
 snake_body = [[100 - (i * 10), 50] for i in range(10)]
 
-food_pos = [random.randrange(1, (frame[0]//10)) * 10,
-            random.randrange(1, (frame[1]//10)) * 10]
+food_pos = [random.randrange(1, (game_frame[0]//10)) * 10,
+            random.randrange(1, (game_frame[1]//10)) * 10]
 food_spawn = True
 
 direction = 'RIGHT'
@@ -36,8 +36,8 @@ health = 10
 score = 0
 item_range = 10 #플레이어가 아이템을 먹을 수 있는 범위
 
-magnet_radius_width = game_frame[0] * 1.1  # 초기 자기장 크기 화면 밖으로 설정
-magnet_radius_height = game_frame[1] * 1.1 
+magnet_radius_width = game_frame[0] * 1.2  # 초기 자기장 크기 화면 밖으로 설정
+magnet_radius_height = game_frame[1] * 1.2 
 magnet_decrease_rate = 5 #테스트용값
 magnet_active = False
 magnet_active_time = 2 #테스트용값
@@ -164,10 +164,10 @@ def generate_food():
         food_y = random.randint(target_rect.y, target_rect.y + target_rect.height - 10)
         food_pos = [food_x // 10 * 10, food_y // 10 * 10]
     else:
-        # 나머지지 확률로 화면 내 임의의 위치 생성
+        # 나머지 확률로 화면 내 임의의 위치 생성
         food_pos = [
-            random.randrange(1, (game_frame[0]//10)) * 10,
-            random.randrange(1, (game_frame[1]//10)) * 10
+        random.randrange(1, (game_frame[0] // 10)) * 10,  # x 좌표 (720px 내)
+        random.randrange(1, (game_frame[1] // 10)) * 10  # y 좌표 (480px 내)
         ]
     return food_pos
 
