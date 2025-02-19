@@ -392,7 +392,7 @@ while True:
     #만약 음식을 먹지 않았다면
     '''
     for food in food_positions:
-        if abs(snake_pos[0] - food["pos"][0]) < item_range and abs(snake_pos[1] - food["pos"][1]) < item_range:
+        if abs(snake_pos[0] - food["pos"][0]) < food["size"][0] and abs(snake_pos[1] - food["pos"][1]) < food["size"][0]:
             apply_item_effect(food["effect"])
             food_positions.remove(food)
             food_gen_count += 1
